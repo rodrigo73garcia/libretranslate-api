@@ -1,16 +1,25 @@
 from flask import Flask, request, jsonify
 import argostranslate.package
 import argostranslate.translate
-import os
 
 app = Flask(__name__)
 
-def download_and_install_models():
-    if not os.path.exists("en_pt.argosmodel"):
-        os.system("wget https://github.com/argosopentech/argos-translate/releases/download/v1.0/en_pt.argosmodel")
-    argostranslate.package.install_from_path("en_pt.argosmodel")
+def install_models():
+    # Atualiza o índice de modelos disponíveis
+    argostranslate.package.update_package_index()
+    available_packages = argostranslate.package.get_available_packages()
+    
+    for pkg in available_packages:
+        if pkg.from_code == "en" and pkg.to_code == "pt":
+            print(f"Instalando modelo {pkg.name} ...")
+            path = pkg.download()
+            argostranslate.package.install_from_path(path)
+            print("Modelo instalado com sucesso.")
+            break
+    else:
+        print("Modelo en=>pt não encontrado nos pacotes disponíveis.")
 
-download_and_install_models()
+install_models()
 
 @app.route("/translate", methods=["POST"])
 def translate():
@@ -36,6 +45,7 @@ def translate():
     try:
         translation = best_source_lang.get_translation(best_target_lang).translate(q)
     except Exception as e:
+        print(f"Erro na tradução: {e}")
         translation = q
 
     return jsonify({"translatedText": translation})
