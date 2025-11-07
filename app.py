@@ -5,13 +5,12 @@ import argostranslate.translate
 app = Flask(__name__)
 
 def install_models():
-    # Atualiza o índice de modelos disponíveis
     argostranslate.package.update_package_index()
     available_packages = argostranslate.package.get_available_packages()
     
     for pkg in available_packages:
         if pkg.from_code == "en" and pkg.to_code == "pt":
-            print(f"Instalando modelo {pkg.name} ...")
+            print(f"Instalando modelo {pkg.from_code}->{pkg.to_code} ...")
             path = pkg.download()
             argostranslate.package.install_from_path(path)
             print("Modelo instalado com sucesso.")
