@@ -1,0 +1,2 @@
+flask==2.2.5
+argostranslate==2.6.0
